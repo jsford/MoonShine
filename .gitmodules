@@ -1,0 +1,3 @@
+[submodule "ext/nanoplan"]
+	path = ext/nanoplan
+	url = https://github.com/jsford/nanoplan.git
