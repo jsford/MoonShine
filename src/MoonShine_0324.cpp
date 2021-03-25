@@ -90,16 +90,23 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
 };
 
 int main(int argc, char** argv) {
-  // TODO: Read the map from a file.
-  ifstream file { "filename.txt" };
-    if (!file.is_open()) return -1;
+  // Read the map from a file.
+  if(argc < 2) {
+    fmt::print("Please provide a map file.\n");
+    fmt::print("usage: ./MoonShine map.txt\n");
+    return -1;
+  }
+  fmt::print("MoonShine\n");
+  fmt::print("Planning using {} map file.\n", argv[1]);
+
+  ifstream file { argv[1] };
   file>>row;
   file>>col;
-
   int Start_X, Start_Y, Goal_X, Goal_Y;
 
   file>>Start_X;
   file>>Start_Y;
+
   file>>Goal_X;
   file>>Goal_Y;
 
@@ -119,12 +126,18 @@ int main(int argc, char** argv) {
 
   // Set the start state.
   State2D start {Start_X, Start_Y};  //  Add cell coordinates
+  fmt::print("Start: ({},{})\n", start.x, start.y);
 
   // Set the goal state.
   State2D  goal {Goal_X, Goal_Y};  //  Add cell coordinates
+  fmt::print("Goal: ({},{})\n", goal.x, goal.y);
 
   // Search for a path from start to goal.
   std::vector<State2D> path = planner.plan(start, goal);
+
+  if(path.size() == 0) {
+    fmt::print("Path not found.");
+  }
 
   // Print out the path.
   for(int i=0; i<path.size(); ++i) {
