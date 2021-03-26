@@ -138,11 +138,21 @@ int main(int argc, char** argv) {
   if(path.size() == 0) {
     fmt::print("Path not found.");
   }
+  
+  // Print out the path and make solution file.
 
-  // Print out the path.
+  ofstream outdata;
+  outdata.open("sol.txt");
+  if( !outdata ) { // file couldn't be opened
+    cerr << "Error: file could not be opened" << endl;
+    exit(1);
+
   for(int i=0; i<path.size(); ++i) {
+    outdata << path[i].x<<'\t'<<path[i].y<<'\t'<<0<<'\t'<<'\t'<<double(path[i].x)/10 + 0.05<<'\t'<<double(path[i].y)/10 + 0.05<<'\t'<<0;
+    outdata<<endl;
     fmt::print("({}, {})", path[i].x, path[i].y);
     if( i != path.size()-1 ) { fmt::print("->"); }
+    
   }
   fmt::print("\n");
 
