@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <math.h>
 
 using namespace std;
 
@@ -10,16 +11,18 @@ int row;
 int col;
 
 std::vector<vector<int>> Obs_Map;
+double theta = 1.5;
 
 struct State2D {
   int x;
   int y;
+  double a;   //Normal vector of Solar Panel
 
   bool operator==(const State2D& rhs) const {
-    return x == rhs.x && y == rhs.y;
+    return x == rhs.x && y == rhs.y && a == rhs.a;
   }
 };
-NANOPLAN_MAKE_STATE_HASHABLE(State2D, s.x, s.y);
+NANOPLAN_MAKE_STATE_HASHABLE(State2D, s.x, s.y, s.a);
 
 
 class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
@@ -30,44 +33,228 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
     std::vector<State2D> get_successors(const State2D& state) override {
       std::vector<State2D> succs;
 
-      State2D    up {state.x+0, state.y+1};
+      State2D    up {state.x+0, state.y+1, M_PI};
       if( 0 <= up.x && up.x < col && 0 <= up.y && up.y < row && Obs_Map[up.x][up.y]) {  // Put GV value here
-        succs.push_back(up);
+        double ang;
+        double ang2;
+        if(theta - up.a >= 0) {
+          ang = theta - up.a;
+        }
+        else if (theta - up.a<0) {
+          ang = theta - up.a + 2*M_PI;
+        }
+
+        if(ang-M_PI >=0){
+          ang2 = ang - M_PI;
+        }
+        else if(ang-M_PI<0) {
+          ang2 = ang + M_PI;
+        }
+
+        if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
+          up.a = ang
+          succs.push_back(up);
+        }
+        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
+          up.a = ang2
+          succs.push_back(up);
+        }
       }
 
-      State2D  down {state.x+0, state.y-1};
+      State2D  down {state.x+0, state.y-1, 0};
       if( 0 <= down.x && down.x < col && 0 <= down.y && down.y < row && Obs_Map[down.x][down.y]) {
-        succs.push_back(down);
+        double ang;
+        double ang2;
+        if(theta - down.a >= 0) {
+          ang = theta - down.a;
+        }
+        else if (theta - down.a<0) {
+          ang = theta - down.a + 2*M_PI;
+        }
+
+        if(ang-M_PI >=0){
+          ang2 = ang - M_PI;
+        }
+        else if(ang-M_PI<0) {
+          ang2 = ang + M_PI;
+        }
+
+        if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
+          down.a = ang
+          succs.push_back(down);
+        }
+        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
+          down.a = ang2
+          succs.push_back(down);
+        }
       }
 
-      State2D  left {state.x-1, state.y+0};
+      State2D  left {state.x-1, state.y+0, 3*M_PI/2};
       if( 0 <= left.x && left.x < col && 0 <= left.y && left.y < row && Obs_Map[left.x][left.y]) {
-        succs.push_back(left);
+        double ang;
+        double ang2;
+        if(theta - left.a >= 0) {
+          ang = theta - left.a;
+        }
+        else if (theta - left.a<0) {
+          ang = theta - left.a + 2*M_PI;
+        }
+
+        if(ang-M_PI >=0){
+          ang2 = ang - M_PI;
+        }
+        else if(ang-M_PI<0) {
+          ang2 = ang + M_PI;
+        }
+
+        if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
+          left.a = ang
+          succs.push_back(left);
+        }
+        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
+          left.a = ang2
+          succs.push_back(left);
+        }
       }
 
-      State2D right {state.x+1, state.y+0};
+      State2D right {state.x+1, state.y+0, M_PI/2};
       if( 0 <= right.x && right.x < col && 0 <= right.y && right.y < row && Obs_Map[right.x][right.y]) {
-        succs.push_back(right);
+        double ang;
+        double ang2;
+        if(theta - right.a >= 0) {
+          ang = theta - right.a;
+        }
+        else if (theta - right.a<0) {
+          ang = theta - right.a + 2*M_PI;
+        }
+
+        if(ang-M_PI >=0){
+          ang2 = ang - M_PI;
+        }
+        else if(ang-M_PI<0) {
+          ang2 = ang + M_PI;
+        }
+
+        if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
+          right.a = ang
+          succs.push_back(right);
+        }
+        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
+          right.a = ang2
+          succs.push_back(right);
+        }
       }
 
-      State2D upright {state.x+1, state.y+1};
+      State2D upright {state.x+1, state.y+1, 3*M_PI/4};
       if( 0 <= upright.x && upright.x < col && 0 <= upright.y && upright.y < row && Obs_Map[upright.x][upright.y]) {
-        succs.push_back(upright);
+        double ang;
+        double ang2;
+        if(theta - upright.a >= 0) {
+          ang = theta - upright.a;
+        }
+        else if (theta - upright.a<0) {
+          ang = theta - upright.a + 2*M_PI;
+        }
+
+        if(ang-M_PI >=0){
+          ang2 = ang - M_PI;
+        }
+        else if(ang-M_PI<0) {
+          ang2 = ang + M_PI;
+        }
+
+        if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
+          upright.a = ang
+          succs.push_back(upright);
+        }
+        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
+          upright.a = ang2
+          succs.push_back(upright);
+        }
       }
 
-      State2D downright {state.x+1, state.y-1};
+      State2D downright {state.x+1, state.y-1, M_PI/4};
       if( 0 <= downright.x && downright.x < col && 0 <= downright.y && downright.y < row && Obs_Map[downright.x][downright.y]) {
-        succs.push_back(downright);
+        double ang;
+        double ang2;
+        if(theta - downright.a >= 0) {
+          ang = theta - downright.a;
+        }
+        else if (theta - downright.a<0) {
+          ang = theta - downright.a + 2*M_PI;
+        }
+
+        if(ang-M_PI >=0){
+          ang2 = ang - M_PI;
+        }
+        else if(ang-M_PI<0) {
+          ang2 = ang + M_PI;
+        }
+
+        if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
+          downright.a = ang
+          succs.push_back(downright);
+        }
+        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
+          downright.a = ang2
+          succs.push_back(downright);
+        }
       }
 
-      State2D upleft {state.x-1, state.y+1};
+      State2D upleft {state.x-1, state.y+1, 5*M_PI/4};
       if( 0 <= upleft.x && upleft.x < col && 0 <= upleft.y && upleft.y < row && Obs_Map[upleft.x][upleft.y]) {
-        succs.push_back(upleft);
+        double ang;
+        double ang2;
+        if(theta - upleft.a >= 0) {
+          ang = theta - upleft.a;
+        }
+        else if (theta - upleft.a<0) {
+          ang = theta - upleft.a + 2*M_PI;
+        }
+
+        if(ang-M_PI >=0){
+          ang2 = ang - M_PI;
+        }
+        else if(ang-M_PI<0) {
+          ang2 = ang + M_PI;
+        }
+
+        if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
+          upleft.a = ang
+          succs.push_back(upleft);
+        }
+        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
+          upleft.a = ang2
+          succs.push_back(upleft);
+        }
       }
 
-      State2D downleft {state.x-1, state.y-1};
+      State2D downleft {state.x-1, state.y-1, 7*M_PI/4};
       if( 0 <= downleft.x && downleft.x < col && 0 <= downleft.y && downleft.y < row && Obs_Map[downleft.x][downleft.y]) {
-        succs.push_back(downleft);
+        double ang;
+        double ang2;
+        if(theta - downleft.a >= 0) {
+          ang = theta - downleft.a;
+        }
+        else if (theta - downleft.a<0) {
+          ang = theta - downleft.a + 2*M_PI;
+        }
+
+        if(ang-M_PI >=0){
+          ang2 = ang - M_PI;
+        }
+        else if(ang-M_PI<0) {
+          ang2 = ang + M_PI;
+        }
+
+        if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
+          downleft.a = ang
+          succs.push_back(downleft);
+        }
+        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
+          downleft.a = ang2
+          succs.push_back(downleft);
+        }
       }
 
       return succs;
@@ -138,7 +325,7 @@ int main(int argc, char** argv) {
   if(path.size() == 0) {
     fmt::print("Path not found.");
   }
-  
+
   // Print out the path and make solution file.
 
   ofstream outdata;
@@ -148,11 +335,11 @@ int main(int argc, char** argv) {
     exit(1);
 
   for(int i=0; i<path.size(); ++i) {
-    outdata << path[i].x<<'\t'<<path[i].y<<'\t'<<0<<'\t'<<'\t'<<double(path[i].x)/10 + 0.05<<'\t'<<double(path[i].y)/10 + 0.05<<'\t'<<0;
+    outdata << path[i].x<<'\t'<<path[i].y<<'\t'<<path[i].a<<'\t'<<'\t'<<double(path[i].x)/10 + 0.05<<'\t'<<double(path[i].y)/10 + 0.05<<'\t'<<0;
     outdata<<endl;
     fmt::print("({}, {})", path[i].x, path[i].y);
     if( i != path.size()-1 ) { fmt::print("->"); }
-    
+
   }
   fmt::print("\n");
 
