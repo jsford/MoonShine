@@ -11,7 +11,7 @@ int row;
 int col;
 
 std::vector<vector<int>> Obs_Map;
-double theta = 3*M_PI/4;
+double theta = 1.1;
 
 struct State2D {
   int x;
@@ -19,10 +19,10 @@ struct State2D {
   double a;   //Normal vector of Solar Panel
 
   bool operator==(const State2D& rhs) const {
-    return x == rhs.x && y == rhs.y && a == rhs.a;
+    return x == rhs.x && y == rhs.y;
   }
 };
-NANOPLAN_MAKE_STATE_HASHABLE(State2D, s.x, s.y, s.a);
+NANOPLAN_MAKE_STATE_HASHABLE(State2D, s.x, s.y);
 
 
 class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
@@ -31,12 +31,15 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
 
     // If you are in state "state", where all can you go in a single step?
     std::vector<State2D> get_successors(const State2D& state) override {
+      fmt::print("current state: ({},{},{})\n ", state.x, state.y, state.a);
       std::vector<State2D> succs;
 
       State2D    up {state.x+0, state.y+1, M_PI};
       if( 0 <= up.x && up.x < col && 0 <= up.y && up.y < row && Obs_Map[up.x][up.y]) {  // Put GV value here
         double ang;
         double ang2;
+				// determine the angle between the normal of the front of the solar panel and the solar influx angle
+        // angle must be between 0 and 2*PI
         if(theta - up.a >= 0) {
           ang = theta - up.a;
         }
@@ -44,20 +47,21 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
           ang = theta - up.a + 2*M_PI;
         }
 
+				// determine the angle between the normal of the back of the solar panel and the solar influx angle
+				// angle must be between 0 and 2*PI
         if(ang-M_PI >=0){
           ang2 = ang - M_PI;
         }
         else if(ang-M_PI<0) {
           ang2 = ang + M_PI;
         }
-
+			
+				// 
         if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
-          up.a = ang;
-          
           succs.push_back(up);
         }
         else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
-          up.a = ang2;
+          up.a = 0; // rover is driving "backwards" 
           succs.push_back(up);
         }
       }
@@ -81,11 +85,11 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
         }
 
         if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
-          down.a = ang;
+          //down.a = ang;
           succs.push_back(down);
         }
         else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
-          down.a = ang2;
+          down.a = M_PI;
           succs.push_back(down);
         }
       }
@@ -109,11 +113,11 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
         }
 
         if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
-          left.a = ang;
+          //left.a = ang;
           succs.push_back(left);
         }
         else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
-          left.a = ang2;
+          left.a = M_PI/2;
           succs.push_back(left);
         }
       }
@@ -137,11 +141,11 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
         }
 
         if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
-          right.a = ang;
+          //right.a = ang;
           succs.push_back(right);
         }
         else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
-          right.a = ang2;
+          right.a = 3*M_PI/2;
           succs.push_back(right);
         }
       }
@@ -165,11 +169,13 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
         }
 
         if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
-          upright.a = ang;
+          //upright.a = ang;
+          //fmt::print("({},{})\n",upright.x, upright.y);
           succs.push_back(upright);
         }
         else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
-          upright.a = ang2;
+          upright.a = 7*M_PI/4;
+          //fmt::print("({},{})\n",upright.x, upright.y);
           succs.push_back(upright);
         }
       }
@@ -193,13 +199,13 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
         }
 
         if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
-          downright.a = ang;
-          fmt::print("{},{}",downright.x, downright.y);
+          //downright.a = ang;
+          //fmt::print("{},{}",downright.x, downright.y);
           succs.push_back(downright);
         }
         else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
-          downright.a = ang2;
-          fmt::print("{},{}",downright.x, downright.y);
+          downright.a = 5*M_PI/4;
+          //fmt::print("{},{}",downright.x, downright.y);
           succs.push_back(downright);
         }
       }
@@ -223,11 +229,11 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
         }
 
         if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
-          upleft.a = ang;
+          //upleft.a = ang;
           succs.push_back(upleft);
         }
         else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
-          upleft.a = ang2;
+          upleft.a = M_PI/4;
           succs.push_back(upleft);
         }
       }
@@ -251,11 +257,11 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
         }
 
         if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
-          downleft.a = ang;
+         // downleft.a = ang;
           succs.push_back(downleft);
         }
         else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
-          downleft.a = ang2;
+          downleft.a = 3*M_PI/4;
           succs.push_back(downleft);
         }
       }
@@ -325,12 +331,16 @@ int main(int argc, char** argv) {
   // Construct an A* planner.
   nanoplan::AStar<SearchSpace2D> planner(space2d);
 
+  double Start_Ang = 0;
+
+  double Goal_Ang = 3*M_PI/4;
+
   // Set the start state.
-  State2D start {Start_X, Start_Y};  //  Add cell coordinates
+  State2D start {Start_X, Start_Y, Start_Ang};  //  Add cell coordinates
   fmt::print("Start: ({},{})\n", start.x, start.y);
 
   // Set the goal state.
-  State2D  goal {Goal_X, Goal_Y};  //  Add cell coordinates
+  State2D  goal {Goal_X, Goal_Y, Goal_Ang};  //  Add cell coordinates
   fmt::print("Goal: ({},{})\n", goal.x, goal.y);
 
   // Search for a path from start to goal.
