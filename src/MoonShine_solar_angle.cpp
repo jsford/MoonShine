@@ -11,7 +11,7 @@ int row;
 int col;
 
 std::vector<vector<int>> Obs_Map;
-double theta = 1.1;
+double theta = 3*M_PI/4 + 0.1;
 
 struct State2D {
   int x;
@@ -31,7 +31,7 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
 
     // If you are in state "state", where all can you go in a single step?
     std::vector<State2D> get_successors(const State2D& state) override {
-      fmt::print("current state: ({},{},{})\n ", state.x, state.y, state.a);
+      //fmt::print("current state: ({},{},{})\n ", state.x, state.y, state.a);
       std::vector<State2D> succs;
 
       State2D    up {state.x+0, state.y+1, M_PI};
@@ -314,17 +314,6 @@ int main(int argc, char** argv) {
     Obs_Map.push_back(ran_arr);
   }
 
-  for (int j = 0; j < col; j++) {
-    fmt::print("{}",Obs_Map[0][j]);
-  }
-  fmt::print("\n");
-  for (int j = 0; j < col; j++) {
-    fmt::print("{}",Obs_Map[1][j]);
-  }
-  fmt::print("\n");
-  fmt::print("Start val: {}\n", Obs_Map[Start_X][Start_Y]);
-  fmt::print("End val: {}\n", Obs_Map[Goal_X][Goal_Y]);
-  fmt::print("\n");
   // Construct a search space.
   auto space2d = std::make_shared<SearchSpace2D>();
 
