@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
   if( !outdata ) { // file couldn't be opened
     cerr << "Error: file could not be opened" << endl;
     exit(1);
-
+  }
   for(int i=0; i<path.size(); ++i) {
     outdata << path[i].x<<'\t'<<path[i].y<<'\t'<<0<<'\t'<<'\t'<<double(path[i].x)/10 + 0.05<<'\t'<<double(path[i].y)/10 + 0.05<<'\t'<<0;
     outdata<<endl;
