@@ -1,3 +1,5 @@
+// NOTE: Ensure all dependencies in CMakeLists are correct
+
 #include <nanoplan/nanoplan.h>
 #include <fmt/format.h>
 #include <iostream>
@@ -11,15 +13,15 @@ int row;
 int col;
 
 std::vector<vector<int>> Obs_Map;
-double theta = 3*M_PI/4 + 0.1;
+double theta = 3*M_PI/4 + 0.1; // Position of the sun (in radian) - 0 to 2*pi
 
 struct State2D {
-  int x;
-  int y;
-  double a;   //Normal vector of Solar Panel
+  int x;	// X coordinate
+  int y;	// Y coordinate
+  double a;	// Normal vector of Solar Panel
 
   bool operator==(const State2D& rhs) const {
-    return x == rhs.x && y == rhs.y;
+    return x == rhs.x && y == rhs.y; // rhs.a is not included as it's not a necessary state space parameter but is still required to provide orientation i.e. we don't solve for "a"
   }
 };
 NANOPLAN_MAKE_STATE_HASHABLE(State2D, s.x, s.y);
@@ -31,14 +33,19 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
 
     // If you are in state "state", where all can you go in a single step?
     std::vector<State2D> get_successors(const State2D& state) override {
-      //fmt::print("current state: ({},{},{})\n ", state.x, state.y, state.a);
-      std::vector<State2D> succs;
-
+      std::vector<State2D> succs; // Stores all possible directions the rover can move based on the current location of the rover
+      //Syntax:
+      //State2D    up {state.x+0, state.y+1, M_PI}; -- State2D <direction of motion> {<new X-position>, <new Y-position>, <angle of normal of the solar panel while moving in that direction>};
+	    
       State2D    up {state.x+0, state.y+1, M_PI};
       if( 0 <= up.x && up.x < col && 0 <= up.y && up.y < row && Obs_Map[up.x][up.y]) {  // Put GV value here
-        double ang;
+        
+	// Can shift the code below into a function. Currently this section is repeated for every <direction of motion>. There are 8 <direction of motion>
+	      
+	// Since the rover can move in 2 directions, 2 angles are needed to account for the 
+	double ang;
         double ang2;
-				// determine the angle between the normal of the front of the solar panel and the solar influx angle
+	// determine the angle between the normal of the front of the solar panel and the solar influx angle
         // angle must be between 0 and 2*PI
         if(theta - up.a >= 0) {
           ang = theta - up.a;
@@ -47,8 +54,8 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
           ang = theta - up.a + 2*M_PI;
         }
 
-				// determine the angle between the normal of the back of the solar panel and the solar influx angle
-				// angle must be between 0 and 2*PI
+	// determine the angle between the normal of the back of the solar panel and the solar influx angle
+	// angle must be between 0 and 2*PI
         if(ang-M_PI >=0){
           ang2 = ang - M_PI;
         }
@@ -56,7 +63,7 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
           ang2 = ang + M_PI;
         }
 			
-				// 
+	// The <direction of motion> is added to succs if the sun (theta) is in the range mentioned below. This range is derived after some basic calculations.
         if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
           succs.push_back(up);
         }
@@ -88,7 +95,7 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
           //down.a = ang;
           succs.push_back(down);
         }
-        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
+        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){
           down.a = M_PI;
           succs.push_back(down);
         }
@@ -113,10 +120,9 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
         }
 
         if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
-          //left.a = ang;
           succs.push_back(left);
         }
-        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
+        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){
           left.a = M_PI/2;
           succs.push_back(left);
         }
@@ -144,7 +150,7 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
           //right.a = ang;
           succs.push_back(right);
         }
-        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
+        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){
           right.a = 3*M_PI/2;
           succs.push_back(right);
         }
@@ -169,13 +175,10 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
         }
 
         if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
-          //upright.a = ang;
-          //fmt::print("({},{})\n",upright.x, upright.y);
           succs.push_back(upright);
         }
-        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
+        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){
           upright.a = 7*M_PI/4;
-          //fmt::print("({},{})\n",upright.x, upright.y);
           succs.push_back(upright);
         }
       }
@@ -199,13 +202,10 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
         }
 
         if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
-          //downright.a = ang;
-          //fmt::print("{},{}",downright.x, downright.y);
           succs.push_back(downright);
         }
-        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
+        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){
           downright.a = 5*M_PI/4;
-          //fmt::print("{},{}",downright.x, downright.y);
           succs.push_back(downright);
         }
       }
@@ -229,10 +229,9 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
         }
 
         if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
-          //upleft.a = ang;
           succs.push_back(upleft);
         }
-        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
+        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){
           upleft.a = M_PI/4;
           succs.push_back(upleft);
         }
@@ -257,10 +256,9 @@ class SearchSpace2D final : public nanoplan::SearchSpace<State2D> {
         }
 
         if (ang>=3*M_PI/4 && ang<=5*M_PI/4){
-         // downleft.a = ang;
           succs.push_back(downleft);
         }
-        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){ //Add pi
+        else if (ang2>=3*M_PI/4 && ang2<=5*M_PI/4){
           downleft.a = 3*M_PI/4;
           succs.push_back(downleft);
         }
@@ -295,9 +293,12 @@ int main(int argc, char** argv) {
   fmt::print("MoonShine\n");
   fmt::print("Planning using {} map file.\n", argv[1]);
 
+  // Stores size of map
   ifstream file { argv[1] };
   file>>row;
   file>>col;
+
+  // Stores start and end location on map
   int Start_X, Start_Y, Goal_X, Goal_Y;
 
   file>>Start_X;
@@ -306,6 +307,7 @@ int main(int argc, char** argv) {
   file>>Goal_X;
   file>>Goal_Y;
 
+  // Stores obstacle/viable map
   for(int i = 0;i<row;i++) {
     std::vector<int> ran_arr(col);
     for(int j=0;j<col;j++) {
@@ -320,16 +322,16 @@ int main(int argc, char** argv) {
   // Construct an A* planner.
   nanoplan::AStar<SearchSpace2D> planner(space2d);
 
+  // Non essential parameters required for initialization
   double Start_Ang = 0;
-
   double Goal_Ang = 3*M_PI/4;
 
   // Set the start state.
-  State2D start {Start_X, Start_Y, Start_Ang};  //  Add cell coordinates
+  State2D start {Start_X, Start_Y, Start_Ang};
   fmt::print("Start: ({},{})\n", start.x, start.y);
 
   // Set the goal state.
-  State2D  goal {Goal_X, Goal_Y, Goal_Ang};  //  Add cell coordinates
+  State2D  goal {Goal_X, Goal_Y, Goal_Ang};
   fmt::print("Goal: ({},{})\n", goal.x, goal.y);
 
   // Search for a path from start to goal.
@@ -347,8 +349,10 @@ int main(int argc, char** argv) {
     cerr << "Error: file could not be opened" << endl;
     exit(1);
   }
+  // Creates solution file("sol.txt") and prints path taken by rover to go from start to end
+  // The "sol.txt" format was based on SBPL's for visualizaion purposes. MS later got it's own visualization setup. The same format works for new visuliazation setup also.
   for(int i=0; i<path.size(); ++i) {
-    outdata << path[i].x<<'\t'<<path[i].y<<'\t'<<path[i].a<<'\t'<<'\t'<<double(path[i].x)/10 + 0.05<<'\t'<<double(path[i].y)/10 + 0.05<<'\t'<<0;
+    outdata << path[i].x<<'\t'<<path[i].y<<'\t'<<path[i].a<<'\t'<<'\t'<<double(path[i].x)/10 + 0.05<<'\t'<<double(path[i].y)/10 + 0.05<<'\t'<<0; 
     outdata<<endl;
     fmt::print("({}, {})", path[i].x, path[i].y);
     if( i != path.size()-1 ) { fmt::print("->"); }
